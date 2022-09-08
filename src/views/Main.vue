@@ -1,0 +1,22 @@
+<template>
+  <my-time />
+</template>
+
+<script lang="ts" setup>
+import MyTime from '@/components/time/Time.vue';
+
+</script>
+
+<style lang="scss">
+body {
+  padding: 0;
+  margin: 0;
+}
+#app {
+  width: 100%;
+  min-height: 100vh;
+  height: 100%;
+  background: black;
+  color: white;
+}
+</style>
