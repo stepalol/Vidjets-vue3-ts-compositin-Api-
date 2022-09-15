@@ -1,17 +1,20 @@
 import axios from 'axios';
 
 const time = {
-  state: {
-    city: 'nn',
-  },
   mutations: {},
   actions: {
-    async getTimeZone({ state } : { state: any}) {
+    async getTimeZone() {
       const res = await axios.get('http://worldtimeapi.org/api/timezone');
-      // .then((res: any) => res.data)
-      console.log('res', res);
-      state.city = res.data;
       return res.data;
+    },
+    async getExtraTime(_:any, name:string) {
+      const res = await axios.get(`http://worldtimeapi.org/api/timezone/${name}`);
+      console.log(res.data);
+      const extraTime = {
+        time: res.data.datetime,
+        name: res.data.timezone,
+      };
+      return extraTime;
     },
   },
   getters: {},
