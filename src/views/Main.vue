@@ -27,8 +27,8 @@ body {
 .positions-vidget {
   display: flex;
   flex-wrap: wrap;
-  & div:nth-child(2n) {
-    padding: 0 15px;
+  &>div:nth-child(2n) {
+    margin: 0 15px;
   }
 }
 </style>
