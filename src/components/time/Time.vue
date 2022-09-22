@@ -2,9 +2,13 @@
   <div class="time">
     <div class="time__title">Время</div>
     <div class="time__current">
-      <p>{{editHour}}<span :class="{'show': hidden}" >:</span>{{ editMinute}}<span :class="{'show': hidden}">:</span>{{editSecond}}</p>
+      {{timeUtc(clock.gmt)}}
+      <span :class="{'show': hidden}">:</span>
+      {{ editMinute}}
+      <span :class="{'show': hidden}">:</span>
+      {{editSecond}}
     </div>
-    <label for="search" class="time__search">
+    <label for="search" class="time__search" @click.stop>
       <input
         type="text"
         id="search"
@@ -13,7 +17,6 @@
         v-model="inputCity"
         @click="showDropdown = true"
         @input="showDropdown = true"
-        @blur="showDropdown = false"
         >
       <div class="dropdown" :class="{open}">
         <dropdouwn-list class="dropdown-item" :filtered-list="filteredCity" @close="closeDropdown"/>
@@ -23,7 +26,12 @@
       <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
         <div class="time-extra__name">{{item.name}}</div>
         <div class="time-extra__clock">
-          {{editHour}}<span :class="{'show': hidden}" >:</span>{{editMinute}}<span :class="{'show': hidden}" >:</span>{{editSecond}}</div>
+          {{timeUtc(item.gmt)}}
+          <span :class="{'show': hidden}">:</span>
+          {{editMinute}}
+          <span :class="{'show': hidden}" >:</span>
+          {{editSecond}}
+        </div>
         <div class="time-extra__delete"></div>
       </div>
     </div>
@@ -39,16 +47,15 @@ import moment from 'moment';
 import { useStore } from 'vuex';
 import DropdouwnList from './DropdouwnList.vue';
 
+interface timeS {
+  time:string,
+  name:string,
+  gmt:number,
+}
+
 const store = useStore();
 const allFilter = ref([]);
-const extraTime = ref([
-  { name: 'Moscow', time: '2121212' },
-  { name: 'Brynsk', time: '2121212' },
-  { name: 'SPB', time: '2121212' },
-  { name: 'Keker-time', time: '2121212' },
-  { name: 'Moscow', time: '2121212' },
-  { name: 'Moscow', time: '2121212' },
-]);
+const extraTime = ref([] as Array<timeS>);
 const inputCity = ref('');
 const hidden = ref(true);
 const showDropdown = ref(false);
@@ -56,6 +63,8 @@ const clock = reactive({
   second: 0,
   minute: 0,
   hour: 0,
+  gmt: 0,
+  utc: 0,
 });
 
 const editTime = (time:number) => {
@@ -64,11 +73,28 @@ const editTime = (time:number) => {
   }
   return time;
 };
+
 const closeDropdown = async (name:string) => {
-  extraTime.value = await store.dispatch('getExtraTime', name);
   inputCity.value = '';
   showDropdown.value = false;
+  const newTime: timeS = await store.dispatch('getExtraTime', name);
+  extraTime.value.push(newTime);
 };
+
+const timeUtc = (hourUtc:number) => {
+  let hour = clock.utc + hourUtc;
+  if (hour < 0) {
+    hour = 24 - hour;
+  }
+  if (hour >= 24) {
+    hour -= 24;
+  }
+  if (hour < 10) {
+    return `0${hour}`;
+  }
+  return hour;
+};
+
 const interval = setInterval(() => {
   clock.second += 1;
   if (clock.second >= 60) {
@@ -77,10 +103,7 @@ const interval = setInterval(() => {
   }
   if (clock.minute >= 60) {
     clock.minute = 0;
-    clock.hour += 1;
-  }
-  if (clock.hour >= 24) {
-    clock.hour = 0;
+    clock.utc += 1;
   }
   if (hidden.value) {
     hidden.value = false;
@@ -91,7 +114,6 @@ const interval = setInterval(() => {
 
 const editSecond = computed(() => editTime(clock.second));
 const editMinute = computed(() => editTime(clock.minute));
-const editHour = computed(() => editTime(clock.hour));
 const open = computed(() => {
   if (inputCity.value !== '' && showDropdown.value) {
     return true;
@@ -117,14 +139,23 @@ const filteredCity = computed(() => {
 
   return temporaryArray;
 });
+const hide = () => {
+  showDropdown.value = false;
+};
 onMounted(async () => {
   clock.second = +(moment().format(' ss '));
   clock.minute = +(moment().format(' mm '));
-  clock.hour = +(moment().format(' HH '));
+  // eslint-disable-next-line prefer-destructuring
+  clock.gmt = +(moment().format('Z').split(':')[0]);
+  clock.utc = +(moment().utc().format('HH'));
   allFilter.value = await store.dispatch('getTimeZone');
+  document.addEventListener('click', hide);
 });
 
-onUnmounted(() => { clearInterval(interval); console.log('destroy'); });
+onUnmounted(() => {
+  clearInterval(interval);
+  document.removeEventListener('click', hide);
+});
 
 </script>
 
@@ -139,6 +170,7 @@ onUnmounted(() => { clearInterval(interval); console.log('destroy'); });
   border-radius: 35px;
   position: relative;
   max-height: 380px;
+  width: 100%;
   &__title {
     align-self: flex-start;
     font-size: 40px;
@@ -146,6 +178,8 @@ onUnmounted(() => { clearInterval(interval); console.log('destroy'); });
     padding: 0 0 0 23px;
   }
   &__current {
+    width: 175px;
+    display: flex;
     font-family: 'LED1';
     font-size: 64px;
     & span {
@@ -223,6 +257,8 @@ onUnmounted(() => { clearInterval(interval); console.log('destroy'); });
       border-bottom-right-radius: 10px;
       overflow: auto;
       transition: max-height 0.3s;
+      background: black;
+      z-index: 3;
 
       &.open {
         max-height: 230px;
@@ -246,7 +282,7 @@ onUnmounted(() => { clearInterval(interval); console.log('destroy'); });
     flex-wrap: wrap;
     width: 100%;
     padding: 10px 25px;
-    max-height: 170px;
+    max-height: 178px;
     overflow: auto;
     &__item {
       width: 48%;
@@ -261,9 +297,11 @@ onUnmounted(() => { clearInterval(interval); console.log('destroy'); });
 
     }
     &__name {
-      font-size: 22px;
+      font-size: 16px;
+      padding: 0 0 7px 0;
     }
     &__clock {
+      display: flex;
       font-size: 31px;
       font-family: 'LED1';
       span {
