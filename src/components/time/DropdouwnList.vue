@@ -1,6 +1,6 @@
 <template v-if="props.filteredList.lengt">
   <div :class="attr.class" v-for="item in props.filteredList" :key="item.city">
-    <div class="time-extra__time" @mousedown.stop.prevent="emitGetTime(item.name)">{{item.city }}</div>
+    <div class="time-extra__time" @click.stop="emitGetTime(item.name)">{{item.city }}</div>
   </div>
 </template>
 
