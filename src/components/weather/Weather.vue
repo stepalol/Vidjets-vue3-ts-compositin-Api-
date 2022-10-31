@@ -1,10 +1,36 @@
 <template>
-  <div class="weather">
+  <div class="weather" v-if="currentWeather.weather">
     <div class="weather__title">Погода</div>
     <div class="weather__delete"></div>
+    <div class="weather__location">Выбранный регион: <span > {{currentWeather.name}} </span></div>
+    <div class="weather__block">
+      <div class="weather__home">
+        <span>{{currentWeather.main.temp}}</span><br>
+        <span> Макс: {{currentWeather.main.temp_min}}</span>
+        <span>Мин: {{currentWeather.main.temp_max}}</span>
+      </div>
+      <div class="weather__current">
+        <img :src="`http://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@4x.png`" alt="">
+        <span>{{currentWeather.weather[0].description}}</span>
+
+      </div>
+    </div>
+    <div class="weather__search">
+      <label for="weather-search">
+        <input type="text" id="weather-search">
+      </label>
+    </div>
   </div>
 </template>
+<script lang="ts" setup>
+import { computed } from 'vue';
+import { useStore } from 'vuex';
 
+const store = useStore();
+const currentWeather = computed <any>(() => store.getters.CURRENT_WEATHER);
+store.dispatch('getForecastWeather');
+
+</script>
 <style lang="scss">
   .weather{
     max-width: 400px;
@@ -61,5 +87,21 @@
         }
       }
   }
+  &__location {
+    align-self: start;
+    padding: 0 0 0 23px;
+    font-size: 18px;
+    span {
+      font-size: 20px;
+    }
   }
+  &__block {
+    display: flex;
+  }
+  &__current {
+    img {
+      width: 150px;
+    }
+  }
+}
 </style>

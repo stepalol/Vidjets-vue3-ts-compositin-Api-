@@ -8,20 +8,12 @@
       <span :class="{'show': hidden}">:</span>
       {{editSecond}}
     </div>
-    <label for="search" class="time__search" @click.stop>
-      <input
-        type="text"
-        id="search"
-        autocomplete="off"
-        placeholder="Выберите странну"
-        v-model="inputCity"
-        @click="showDropdown = true"
-        @input="showDropdown = true"
-        >
-      <div class="dropdown" :class="{open}">
-        <dropdouwn-list class="dropdown-item" :filtered-list="filteredCity" @close="closeDropdown"/>
-      </div>
-    </label>
+    <select-custom
+      :filtered-list="filteredCity"
+      :placeholder="'Выберите странну'"
+      @valueInput="valueInput"
+      @select="closeDropdown"
+    />
     <div class="time-extra">
       <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
         <div class="time-extra__name">{{item.name}}</div>
@@ -45,7 +37,7 @@ import {
 } from 'vue';
 import moment from 'moment';
 import { useStore } from 'vuex';
-import DropdouwnList from './DropdouwnList.vue';
+import SelectCustom from '@/components/SelectCustom.vue';
 
 interface timeS {
   time:string,
@@ -54,11 +46,10 @@ interface timeS {
 }
 
 const store = useStore();
-const allFilter = ref([]);
+const allFilter = ref([]); // state
 const extraTime = ref([] as Array<timeS>);
 const inputCity = ref('');
 const hidden = ref(true);
-const showDropdown = ref(false);
 const clock = reactive({
   second: 0,
   minute: 0,
@@ -75,12 +66,13 @@ const editTime = (time:number) => {
 };
 
 const closeDropdown = async (name:string) => {
-  inputCity.value = '';
-  showDropdown.value = false;
-  const newTime: timeS = await store.dispatch('getExtraTime', name);
+  const newTime = await store.dispatch('getExtraTime', name);
   extraTime.value.push(newTime);
 };
 
+const valueInput = (e:string) => {
+  inputCity.value = e;
+};
 const timeUtc = (hourUtc:number) => {
   let hour = clock.utc + hourUtc;
   if (hour < 0) {
@@ -114,12 +106,7 @@ const interval = setInterval(() => {
 
 const editSecond = computed(() => editTime(clock.second));
 const editMinute = computed(() => editTime(clock.minute));
-const open = computed(() => {
-  if (inputCity.value !== '' && showDropdown.value) {
-    return true;
-  }
-  return false;
-});
+
 const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
 
@@ -139,9 +126,7 @@ const filteredCity = computed(() => {
 
   return temporaryArray;
 });
-const hide = () => {
-  showDropdown.value = false;
-};
+
 onMounted(async () => {
   clock.second = +(moment().format(' ss '));
   clock.minute = +(moment().format(' mm '));
@@ -149,12 +134,10 @@ onMounted(async () => {
   clock.gmt = +(moment().format('Z').split(':')[0]);
   clock.utc = +(moment().utc().format('HH'));
   allFilter.value = await store.dispatch('getTimeZone');
-  document.addEventListener('click', hide);
 });
 
 onUnmounted(() => {
   clearInterval(interval);
-  document.removeEventListener('click', hide);
 });
 
 </script>
@@ -169,6 +152,7 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.54);
   border-radius: 35px;
   position: relative;
+
   max-height: 380px;
   width: 100%;
   &__title {
@@ -209,73 +193,23 @@ onUnmounted(() => {
         background-color: white;
         border-radius: 10px;
       }
-      &::after {
-        transform-origin: right;
-        transform: rotate(-45deg);
-        left: 0;
+    &::after {
+      transform-origin: right;
+      transform: rotate(-45deg);
+      left: 0;
 
-      }
-      &::before {
-        transform-origin: left;
-        transform: rotate(45deg);
-        right: 0;
+    }
+    &::before {
+      transform-origin: left;
+      transform: rotate(45deg);
+      right: 0;
 
-      }
-      &:hover {
-        &::before,&::after {
-          background-color: red;
-        }
-      }
-  }
-  &__search {
-    width: 100%;
-    position: relative;
-    input {
-      outline: none;
-      background: transparent;
-      border: 1px solid #959595;
-      width: 90%;
-      margin: 0 5%;
-      border-radius: 10px;
-      height: 38px;
-      color: white;
-      font-size: 17px;
-      padding: 0 12px;
-      &:focus, &:hover {
-        border: 1px solid white;
-      }
-      &::placeholder {
-        font-style: italic;
+    }
+    &:hover {
+      &::before,&::after {
+        background-color: red;
       }
     }
-    .dropdown {
-      position: absolute;
-      width: 86%;
-      margin: 0 7%;
-      max-height: 0;
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
-      overflow: auto;
-      transition: max-height 0.3s;
-      background: black;
-      z-index: 3;
-
-      &.open {
-        max-height: 230px;
-        border: 1px solid white;
-        border-top: none;
-      }
-      &-item {
-        padding: 7px 15px;
-        font-size: 600;
-        cursor: pointer;
-        &:hover {
-          background: white;
-          color: black;
-        }
-      }
-    }
-
   }
   .time-extra {
     display: flex;
