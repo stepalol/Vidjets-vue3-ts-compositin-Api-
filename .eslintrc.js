@@ -12,6 +12,7 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
+    'linebreak-style': 0,
     'max-len': ["error", { "code": 140 }],
     'vue/max-len': ['error', {
       code: 140,
