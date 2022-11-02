@@ -1,9 +1,8 @@
 <template v-if="props.filteredList.lengt">
     <div class="select-custom">
-      <label for="search"  @click.stop>
+      <label   @click.stop>
         <input
           type="text"
-          id="search"
           autocomplete="off"
           :placeholder="placeholder"
           v-model="inputCity"
@@ -13,7 +12,7 @@
     </label>
     <div class="dropdown" :class="{open}">
         <div  class="dropdown__item" v-for="item in props.filteredList" :key="item.city">
-          <div class="dropdown__name" @click="emitGetTime(item.name)">{{item.city }}</div>
+          <div class="dropdown__name" @click="emitGetTime(item.name)">{{item.city || item.name }}</div>
         </div>
       </div>
     </div>
