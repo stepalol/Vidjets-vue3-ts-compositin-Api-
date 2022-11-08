@@ -34,7 +34,7 @@ import { Course } from '@/interfaces/Irate';
 
 const store = useStore();
 store.dispatch('getRate');
-const currentRate = computed <any>(() => store.getters.CURRENT_RATE);
+const currentRate = computed <Course[]>(() => store.getters.CURRENT_RATE);
 const search = ref('');
 
 const valueInput = (e:string) => {
@@ -44,7 +44,7 @@ const defaultRate = ref<string | undefined>('USD');
 
 const filteredRate = computed(() => {
   if (search.value === '') return [];
-  const filtered = currentRate.value.filter((item: any) => (item.Name.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase())
+  const filtered = currentRate.value.filter((item: Course) => (item.Name.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase())
         || (item.CharCode.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase()));
   return filtered;
 });
@@ -56,7 +56,6 @@ const showRate = computed(() => {
 
 const graphic = computed(() => {
   if (showRate.value.Value > showRate.value.Previous) {
-    console.log('ssss');
     return require('@/assets/image/up.png');
   }
   console.log('showRate.value.Value', showRate.value.Value);
