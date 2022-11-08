@@ -11,8 +11,8 @@
     <select-custom
       :filtered-list="filteredCity"
       :placeholder="'Выберите странну'"
-      @valueInput="valueInput"
       @select="closeDropdown"
+      @valueInput="valueInput"
     />
     <div class="time-extra">
       <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
@@ -38,16 +38,12 @@ import {
 import moment from 'moment';
 import { useStore } from 'vuex';
 import SelectCustom from '@/components/SelectCustom.vue';
-
-interface timeS {
-  time:string,
-  name:string,
-  gmt:number,
-}
+import { Time, TimeItem } from '@/interfaces/Itime';
+import { SelectDropDown } from '@/interfaces';
 
 const store = useStore();
 const allFilter = ref([]); // state
-const extraTime = ref([] as Array<timeS>);
+const extraTime = ref([] as Array<Time>);
 const inputCity = ref('');
 const hidden = ref(true);
 const clock = reactive({
@@ -65,8 +61,8 @@ const editTime = (time:number) => {
   return time;
 };
 
-const closeDropdown = async (name:string) => {
-  const newTime = await store.dispatch('getExtraTime', name);
+const closeDropdown = async (item:SelectDropDown) => {
+  const newTime = await store.dispatch('getExtraTime', item.name);
   extraTime.value.push(newTime);
 };
 
@@ -110,7 +106,7 @@ const editMinute = computed(() => editTime(clock.minute));
 const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
 
-  const temporaryArray:Array<{name: string, city:string}> = [];
+  const temporaryArray:TimeItem[] = [];
   allFilter.value.forEach((item:string) => {
     const searchCity = item.split('/')[1];
     if (!searchCity) return;

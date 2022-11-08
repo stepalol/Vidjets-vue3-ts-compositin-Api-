@@ -1,18 +1,17 @@
 <template v-if="props.filteredList.lengt">
     <div class="select-custom">
-      <label   @click.stop>
+      <label>
         <input
           type="text"
           autocomplete="off"
           :placeholder="placeholder"
           v-model="inputCity"
-          @click.stop="showDropdown = true"
           @input="showDropdown = true, emitValueInput(inputCity)"
         />
     </label>
     <div class="dropdown" :class="{open}">
-        <div  class="dropdown__item" v-for="item in props.filteredList" :key="item.city">
-          <div class="dropdown__name" @click="emitGetTime(item.name)">{{item.city || item.name }}</div>
+        <div  class="dropdown__item" v-for="item in props.filteredList" :key="item.city " @click="emitGetTime(item)">
+          <div class="dropdown__name" >{{item.city || item.name || item.CharCode}}</div>
         </div>
       </div>
     </div>
@@ -23,27 +22,33 @@
 import {
   defineProps, withDefaults, defineEmits, computed, ref, watch,
 } from 'vue';
+import { SelectDropDown, SelectItem } from '@/interfaces';
 
 interface Props {
-  filteredList: Array<{city: string, name: string}>,
+  filteredList: SelectItem[],
   placeholder: string,
 }
-const emit = defineEmits<{(e: string, name:string): void}>();
+
+const emit = defineEmits<{(e: 'select', name: SelectDropDown): void,
+  (e: 'valueInput', name: string): void,
+}>();
 
 const inputCity = ref('');
 const showDropdown = ref(false);
 
-const emitGetTime = (name:string) => {
+const emitGetTime = (item:SelectItem) => {
   inputCity.value = '';
   showDropdown.value = false;
-  emit('select', name);
+  emit('select', item);
 };
-const emitValueInput = (value:string) => {
-  emit('valueInput', value);
-};
+
 const props = withDefaults(defineProps<Props>(), {
   filteredList: () => ([]),
 });
+
+const emitValueInput = (value:string) => {
+  emit('valueInput', value);
+};
 
 const hide = () => {
   showDropdown.value = false;

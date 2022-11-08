@@ -1,39 +1,19 @@
 import axios from 'axios';
+import { WeatherData, WeatherState, Coords } from '@/interfaces/Iweather';
 
 const apiKeyWeather = '6f69403d87c3aa83bc813caf140e36e5';
 
-interface WeatherData {
-  name: string,
-  sys: {
-    country: string,
-  },
-  main: {
-    temp: number,
-    tempMax: number,
-    tempMin: number,
-  },
-  weather: [
-    {
-      description: string,
-      icon: string,
-    }
-  ]
-}
-interface weatherState {
-  currentWeather: WeatherData
-}
 const weather = {
   state: {
     currentWeather: [],
   },
   mutations: {
-    setCurrentWeather(state:weatherState, payload:WeatherData): void {
+    setCurrentWeather(state:WeatherState, payload:WeatherData): void {
       state.currentWeather = payload;
     },
   },
   actions: {
-    async getForecastWeather({ commit }: any, payload: {lat:number, lon:number}): Promise<void> {
-      console.log(payload);
+    async getForecastWeather({ commit }: any, payload: Coords): Promise<void> {
       const { data } = await axios.get<Array<WeatherData>>('https://api.openweathermap.org/data/2.5/weather',
         {
           params: {
@@ -44,13 +24,12 @@ const weather = {
             appid: apiKeyWeather,
           },
         });
-      console.log(data);
 
       commit('setCurrentWeather', data);
     },
   },
   getters: {
-    CURRENT_WEATHER(state:weatherState):WeatherData {
+    CURRENT_WEATHER(state:WeatherState):WeatherData {
       return state.currentWeather;
     },
   },

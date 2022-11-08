@@ -17,7 +17,13 @@
 
       </div>
     </div>
-    <select-custom class="test" :placeholder="'Выберите город'" @valueInput="valueInput" :filtered-list="filteredCity"/>
+    <select-custom
+      class="test"
+      :placeholder="'Выберите город'"
+      @valueInput="valueInput"
+      :filtered-list="filteredCity"
+      @select="selectCity"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -25,6 +31,8 @@ import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import SelectCustom from '@/components/SelectCustom.vue';
 import cities from '@/assets/json/cities.json';
+import { WeatherData, WeatherState, Coords } from '@/interfaces/Iweather';
+import { SelectDropDown } from '@/interfaces';
 
 const store = useStore();
 const currentWeather = computed <any>(() => store.getters.CURRENT_WEATHER);
@@ -41,7 +49,6 @@ function focus() {
 
 const valueInput = (e:string) => {
   inputCity.value = e;
-  console.log(cities);
 };
 interface city {
     name:string,
@@ -54,12 +61,12 @@ const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
   const search:string = inputCity.value.slice(0, 1).toLocaleUpperCase();
   const test: {[index: string]:any} = cities;
-  const filtered = test[search].filter((item: city) => {
-    console.log(item);
-    return item;
-  });
+  const filtered = test[search].filter((item: city) => item.name.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase());
   return filtered;
 });
+const selectCity = (e: SelectDropDown) => {
+  store.dispatch('getForecastWeather', e.coords);
+};
 </script>
 <style lang="scss">
   .weather{
@@ -133,6 +140,7 @@ const filteredCity = computed(() => {
   &__block {
     display: flex;
     width: 100%;
+    margin-bottom: 10px;
   }
   &__current {
     width: 50%;
