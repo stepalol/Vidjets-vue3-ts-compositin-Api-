@@ -35,7 +35,7 @@ import { WeatherData, WeatherState, Coords } from '@/interfaces/Iweather';
 import { SelectDropDown } from '@/interfaces';
 
 const store = useStore();
-const currentWeather = computed <any>(() => store.getters.CURRENT_WEATHER);
+const currentWeather = computed <WeatherData>(() => store.getters.CURRENT_WEATHER);
 const coords:{lat: number, lon: number} = { lat: 55.75583, lon: 37.61778 };
 
 const inputCity = ref('');
@@ -60,7 +60,7 @@ interface city {
 const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
   const search:string = inputCity.value.slice(0, 1).toLocaleUpperCase();
-  const test: {[index: string]:any} = cities;
+  const test: {[index: string]:any} = cities; // к максу обратиться
   const filtered = test[search].filter((item: city) => item.name.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase());
   return filtered;
 });

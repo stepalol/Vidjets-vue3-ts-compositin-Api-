@@ -5,8 +5,8 @@ export interface WeatherData {
     },
     main: {
         temp: number,
-        tempMax: number,
-        tempMin: number,
+        'temp_max': number,
+        'temp_min': number,
     },
     weather: [
         {
