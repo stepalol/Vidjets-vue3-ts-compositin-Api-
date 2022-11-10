@@ -1,10 +1,10 @@
 <template>
-  <div class="positions-vidget">
+  <div class="positions-vidget" >
     <my-time v-if="widgetsShow.vgTime"/>
     <my-weather v-if="widgetsShow.vgWeather"/>
     <my-rate v-if="widgetsShow.vgRate"/>
   </div>
-  <vidgets-action v-model="widgetsShow" @change-vidget="changeShowVidets"/>
+  <vidgets-action v-model="widgetsShow" @change-vidget="changeShowVidets" />
 </template>
 
 <script lang="ts" setup>
