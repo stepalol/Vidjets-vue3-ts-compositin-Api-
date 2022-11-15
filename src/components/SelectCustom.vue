@@ -14,6 +14,9 @@
         :key="item + Math.random()" @click="emitGetTime(item)">
           <div class="dropdown__name" >{{item}}</div>
         </div>
+        <div class="dropdown__item" v-if="!props.filteredList.length">
+          <div class="dropdown__name" >Ничего не найдено!</div>
+        </div>
       </div>
     </div>
 
@@ -99,8 +102,8 @@ watch(showDropdown, () => {
     max-height: 0;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-    overflow: auto;
-    transition: max-height 0.3s;
+    overflow: hidden;
+    transition: max-height 0.1s;
     background: black;
     z-index: 3;
 
@@ -108,6 +111,7 @@ watch(showDropdown, () => {
       max-height: 230px;
       border: 1px solid white;
       border-top: none;
+      overflow: auto;
     }
     &__item {
       padding: 7px 15px;
@@ -117,6 +121,19 @@ watch(showDropdown, () => {
         background: white;
         color: black;
       }
+    }
+    &::-webkit-scrollbar {
+      background: transparent;
+      width: 6px;
+      margin: 0 2px 0 0;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: white;
+      width: 4px;
+      border-radius: 4px;
     }
   }
 

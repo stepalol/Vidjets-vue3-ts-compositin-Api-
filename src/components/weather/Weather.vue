@@ -42,8 +42,10 @@ const inputCity = ref('');
 store.dispatch('getForecastWeather', coords);
 
 function focus() {
-  const test:any = document.querySelector('.test');
-  test.querySelector('input').focus();
+  const test: HTMLElement | null = document.querySelector('.test input');
+  if (test) {
+    test.focus();
+  }
 }
 
 const valueInput = (e:string) => {
@@ -56,6 +58,7 @@ const filteredCity = computed(() => {
 
   const test: {[key: string]:Сity[]} = cities;
   const tempFilter: string[] = [];
+  if (!test[search]) return tempFilter;
 
   test[search].forEach((item: Сity) => {
     if (item.name.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase()) {
