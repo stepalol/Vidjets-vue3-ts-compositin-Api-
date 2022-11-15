@@ -3,8 +3,3 @@ export interface Time {
     name:string,
     gmt:number,
 }
-
-export interface TimeItem {
-    name: string,
-    city:string
-}

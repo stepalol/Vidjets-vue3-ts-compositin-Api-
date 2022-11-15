@@ -11,8 +11,12 @@ const rate = {
   },
   actions: {
     async getRate({ commit }: any) {
-      const res = await axios.get('https://www.cbr-xml-daily.ru/daily_json.js');
-      commit('setCurrentRate', Object.values(res.data.Valute));
+      try {
+        const res = await axios.get('https://www.cbr-xml-daily.ru/daily_json.js');
+        commit('setCurrentRate', Object.values(res.data.Valute));
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
   getters: {

@@ -31,8 +31,7 @@ import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import SelectCustom from '@/components/SelectCustom.vue';
 import cities from '@/assets/json/cities.json';
-import { WeatherData, WeatherState, Coords } from '@/interfaces/Iweather';
-import { SelectDropDown } from '@/interfaces';
+import { WeatherData, Сity } from '@/interfaces/Iweather';
 
 const store = useStore();
 const currentWeather = computed <WeatherData>(() => store.getters.CURRENT_WEATHER);
@@ -50,22 +49,29 @@ function focus() {
 const valueInput = (e:string) => {
   inputCity.value = e;
 };
-interface city {
-    name:string,
-    cords: {
-      lat: string,
-      lon: string
-    }
-}
+
 const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
   const search:string = inputCity.value.slice(0, 1).toLocaleUpperCase();
-  const test: {[index: string]:any} = cities; // к максу обратиться
-  const filtered = test[search].filter((item: city) => item.name.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase());
-  return filtered;
+
+  const test: {[key: string]:Сity[]} = cities;
+  const tempFilter: string[] = [];
+
+  test[search].forEach((item: Сity) => {
+    if (item.name.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase()) {
+      tempFilter.push(item.name);
+    }
+  });
+  return tempFilter;
 });
-const selectCity = (e: SelectDropDown) => {
-  store.dispatch('getForecastWeather', e.coords);
+const selectCity = (e: string) => {
+  const search = e.slice(0, 1).toLocaleUpperCase();
+  const test: {[key: string]:Сity[]} = cities;
+  test[search].forEach((item: Сity) => {
+    if (item.name.toLowerCase() === e.toLowerCase()) {
+      store.dispatch('getForecastWeather', item.coords);
+    }
+  });
 };
 </script>
 <style lang="scss">

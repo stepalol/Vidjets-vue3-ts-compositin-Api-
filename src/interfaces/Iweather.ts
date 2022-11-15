@@ -15,6 +15,13 @@ export interface WeatherData {
         }
     ]
 }
+export interface Сity {
+    name:string,
+    coords: {
+      lat: string,
+      lon: string
+    }
+}
 
 export interface WeatherState {
     currentWeather: WeatherData

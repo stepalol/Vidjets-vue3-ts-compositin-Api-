@@ -10,8 +10,9 @@
         />
     </label>
     <div class="dropdown" :class="{open}">
-        <div  class="dropdown__item" v-for="item in props.filteredList" :key="item.city " @click="emitGetTime(item)">
-          <div class="dropdown__name" >{{item.city || item.name || item.CharCode}}</div>
+        <div  class="dropdown__item" v-for="item in props.filteredList" :id="item + Math.random()"
+        :key="item + Math.random()" @click="emitGetTime(item)">
+          <div class="dropdown__name" >{{item}}</div>
         </div>
       </div>
     </div>
@@ -22,21 +23,20 @@
 import {
   defineProps, withDefaults, defineEmits, computed, ref, watch,
 } from 'vue';
-import { SelectDropDown, SelectItem } from '@/interfaces';
 
 interface Props {
-  filteredList: SelectItem[],
+  filteredList: string[],
   placeholder: string,
 }
 
-const emit = defineEmits<{(e: 'select', name: SelectDropDown): void,
+const emit = defineEmits<{(e: 'select', name: string): void,
   (e: 'valueInput', name: string): void,
 }>();
 
 const inputCity = ref('');
 const showDropdown = ref(false);
 
-const emitGetTime = (item:SelectItem) => {
+const emitGetTime = (item: string) => {
   inputCity.value = '';
   showDropdown.value = false;
   emit('select', item);

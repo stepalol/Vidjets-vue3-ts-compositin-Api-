@@ -11,7 +11,7 @@
     <select-custom
       :filtered-list="filteredCity"
       :placeholder="'Выберите странну'"
-      @select="closeDropdown"
+      @select="selectTime"
       @valueInput="valueInput"
     />
     <div class="time-extra">
@@ -38,8 +38,7 @@ import {
 import moment from 'moment';
 import { useStore } from 'vuex';
 import SelectCustom from '@/components/SelectCustom.vue';
-import { Time, TimeItem } from '@/interfaces/Itime';
-import { SelectDropDown } from '@/interfaces';
+import { Time } from '@/interfaces/Itime';
 
 const store = useStore();
 const allFilter = ref([]); // state
@@ -61,9 +60,15 @@ const editTime = (time:number) => {
   return time;
 };
 
-const closeDropdown = async (item:SelectDropDown) => {
-  const newTime = await store.dispatch('getExtraTime', item.name);
-  extraTime.value.push(newTime);
+const selectTime = (city:string) => {
+  allFilter.value.forEach(async (item:string) => {
+    const searchCity = item.split('/')[1];
+    if (!searchCity) return;
+    if (searchCity === city) {
+      const newTime = await store.dispatch('getExtraTime', item);
+      extraTime.value.push(newTime);
+    }
+  });
 };
 
 const valueInput = (e:string) => {
@@ -106,17 +111,18 @@ const editMinute = computed(() => editTime(clock.minute));
 const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
 
-  const temporaryArray:TimeItem[] = [];
+  const temporaryArray:string[] = [];
+
   allFilter.value.forEach((item:string) => {
     const searchCity = item.split('/')[1];
     if (!searchCity) return;
 
-    if (searchCity.slice(0, inputCity.value.length).toLocaleLowerCase() === inputCity.value.toLocaleLowerCase()) {
+    if (searchCity.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase()) {
       const name = {
         name: item,
         city: item.split('/')[1],
       };
-      temporaryArray.push(name);
+      temporaryArray.push(name.city);
     }
   });
 

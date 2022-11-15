@@ -29,7 +29,6 @@
 import SelectCustom from '@/components/SelectCustom.vue';
 import { useStore } from 'vuex';
 import { computed, ref } from 'vue';
-import { SelectDropDown } from '@/interfaces';
 import { Course } from '@/interfaces/Irate';
 
 const store = useStore();
@@ -44,9 +43,14 @@ const defaultRate = ref<string | undefined>('USD');
 
 const filteredRate = computed(() => {
   if (search.value === '') return [];
-  const filtered = currentRate.value.filter((item: Course) => (item.Name.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase())
-        || (item.CharCode.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase()));
-  return filtered;
+  const tempFilted:string[] = [];
+  currentRate.value.forEach((item: Course) => {
+    if (item.Name.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase()
+      || item.CharCode.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase()) {
+      tempFilted.push(item.CharCode);
+    }
+  });
+  return tempFilted;
 });
 
 const showRate = computed(() => {
@@ -63,8 +67,8 @@ const graphic = computed(() => {
   return require('@/assets/image/down.png');
 });
 
-const selectRate = (item: SelectDropDown) => {
-  defaultRate.value = item.CharCode;
+const selectRate = (item: string) => {
+  defaultRate.value = item;
 };
 </script>
 
