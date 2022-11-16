@@ -16,9 +16,10 @@ import { onMounted, reactive } from 'vue';
 import VidgetsAction from '@/components/VidgetActions.vue';
 
 interface propsActions {
-    vgTime: boolean,
-    vgRate: boolean,
-    vgWeather: boolean,
+  vgTime:boolean,
+  vgWeather:boolean,
+  vgRate:boolean,
+  [key: string]: boolean,
 }
 
 const widgetsShow = reactive<propsActions>({
@@ -26,16 +27,20 @@ const widgetsShow = reactive<propsActions>({
   vgRate: false,
   vgWeather: false,
 });
-const changeShowVidets = (value: any) => {
+
+const changeShowVidets = (value: string) => {
   widgetsShow[value] = !widgetsShow[value];
 };
 
 onMounted(() => {
-  Sortable.create(document.querySelector('.positions-vidget'), {
-    ghostClass: 'sortable-ghost',
-    dragClass: 'sortable-drag',
-    forceFallback: false,
-  });
+  const sorttable: HTMLElement | null = document.querySelector('.positions-vidget');
+  if (sorttable) {
+    Sortable.create(sorttable, {
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      forceFallback: false,
+    });
+  }
 });
 </script>
 

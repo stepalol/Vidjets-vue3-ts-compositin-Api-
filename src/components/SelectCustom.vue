@@ -1,5 +1,5 @@
-<template v-if="props.filteredList.lengt">
-    <div class="select-custom">
+<template>
+    <div class="select-custom"  @click.prevent.stop>
       <label>
         <input
           type="text"
@@ -10,11 +10,18 @@
         />
     </label>
     <div class="dropdown" :class="{open}">
-        <div  class="dropdown__item" v-for="item in props.filteredList" :id="item + Math.random()"
-        :key="item + Math.random()" @click="emitGetTime(item)">
+        <div
+          v-for="item in props.filteredList"
+          class="dropdown__item"
+          :key="item + Math.random()"
+          @click="emitGetTime(item)"
+        >
           <div class="dropdown__name" >{{item}}</div>
         </div>
-        <div class="dropdown__item" v-if="!props.filteredList.length">
+        <div
+          class="dropdown__item"
+          v-if="!props.filteredList.length"
+        >
           <div class="dropdown__name" >Ничего не найдено!</div>
         </div>
       </div>
@@ -98,12 +105,11 @@ watch(showDropdown, () => {
   .dropdown {
     position: absolute;
     width: 86%;
-    margin: 0 7%;
+    margin: 0 7% ;
     max-height: 0;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     overflow: hidden;
-    transition: max-height 0.1s;
     background: black;
     z-index: 3;
 

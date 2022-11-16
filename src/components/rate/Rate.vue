@@ -1,5 +1,7 @@
 <template>
 <div class="rate">
+  <Preloader v-if="!currentRate.length" />
+  <template v-else>
     <div class="rate__title">Курс</div>
     <div class="rate__delete"></div>
     <div class="rate__block" v-if="showRate?.CharCode">
@@ -22,17 +24,24 @@
       @valueInput="valueInput"
       @select="selectRate"
     />
+  </template>
 </div>
 </template>
 
 <script lang="ts" setup>
 import SelectCustom from '@/components/SelectCustom.vue';
 import { useStore } from 'vuex';
-import { computed, ref } from 'vue';
+import { computed, ref, onBeforeUnmount } from 'vue';
 import { Course } from '@/interfaces/Irate';
+import Preloader from '@/components/Preloader.vue';
 
 const store = useStore();
 store.dispatch('getRate');
+const getRate = () => {
+  store.dispatch('getRate');
+};
+const updateRate = setInterval(getRate, 180000);
+
 const currentRate = computed <Course[]>(() => store.getters.CURRENT_RATE);
 const search = ref('');
 
@@ -62,14 +71,16 @@ const graphic = computed(() => {
   if (showRate.value.Value > showRate.value.Previous) {
     return require('@/assets/image/up.png');
   }
-  console.log('showRate.value.Value', showRate.value.Value);
-  console.log(' showRate.value.Previous', showRate.value.Previous);
   return require('@/assets/image/down.png');
 });
 
 const selectRate = (item: string) => {
   defaultRate.value = item;
 };
+
+onBeforeUnmount(() => {
+  clearInterval(updateRate);
+});
 </script>
 
 <style lang="scss">
@@ -84,6 +95,9 @@ const selectRate = (item: string) => {
     border-radius: 35px;
     position: relative;
     max-height: 380px;
+    align-self: flex-start;
+    min-height: 201px;
+    justify-content: center;
     &__title {
       align-self: flex-start;
       font-size: 40px;

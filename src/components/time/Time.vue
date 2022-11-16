@@ -1,33 +1,36 @@
 <template>
   <div class="time">
-    <div class="time__title">Время</div>
-    <div class="time__current">
-      {{timeUtc(clock.gmt)}}
-      <span :class="{'show': hidden}">:</span>
-      {{ editMinute}}
-      <span :class="{'show': hidden}">:</span>
-      {{editSecond}}
-    </div>
-    <select-custom
-      :filtered-list="filteredCity"
-      :placeholder="'Выберите странну'"
-      @select="selectTime"
-      @valueInput="valueInput"
-    />
-    <div class="time-extra">
-      <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
-        <div class="time-extra__name">{{item.name}}</div>
-        <div class="time-extra__clock">
-          {{timeUtc(item.gmt)}}
-          <span :class="{'show': hidden}">:</span>
-          {{editMinute}}
-          <span :class="{'show': hidden}" >:</span>
-          {{editSecond}}
-        </div>
-        <div class="time-extra__delete"></div>
+    <Preloader  v-if="!allFilter.length"/>
+    <template v-else>
+      <div class="time__title">Время</div>
+      <div class="time__current">
+        {{timeUtc(clock.gmt)}}
+        <span :class="{'show': hidden}">:</span>
+        {{ editMinute}}
+        <span :class="{'show': hidden}">:</span>
+        {{editSecond}}
       </div>
-    </div>
-    <div class="time__delete"></div>
+      <select-custom
+        :filtered-list="filteredCity"
+        :placeholder="'Выберите странну'"
+        @select="selectTime"
+        @valueInput="valueInput"
+      />
+      <div class="time-extra">
+        <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
+          <div class="time-extra__name">{{item.name}}</div>
+          <div class="time-extra__clock">
+            {{timeUtc(item.gmt)}}
+            <span :class="{'show': hidden}">:</span>
+            {{editMinute}}
+            <span :class="{'show': hidden}" >:</span>
+            {{editSecond}}
+          </div>
+          <div class="time-extra__delete"></div>
+        </div>
+      </div>
+      <div class="time__delete"></div>
+    </template>
   </div>
 </template>
 
@@ -35,6 +38,7 @@
 import {
   computed, onMounted, onUnmounted, reactive, ref,
 } from 'vue';
+import Preloader from '@/components/Preloader.vue';
 import moment from 'moment';
 import { useStore } from 'vuex';
 import SelectCustom from '@/components/SelectCustom.vue';
@@ -128,7 +132,16 @@ const filteredCity = computed(() => {
 
   return temporaryArray;
 });
-
+const updateTime = () => {
+  if (document.visibilityState === 'visible') {
+    clock.second = +(moment().format(' ss '));
+    clock.minute = +(moment().format(' mm '));
+    // eslint-disable-next-line prefer-destructuring
+    clock.gmt = +(moment().format('Z').split(':')[0]);
+    clock.utc = +(moment().utc().format('HH'));
+  }
+};
+window.addEventListener('visibilitychange', updateTime);
 onMounted(async () => {
   clock.second = +(moment().format(' ss '));
   clock.minute = +(moment().format(' mm '));
@@ -140,6 +153,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearInterval(interval);
+  window.removeEventListener('visibilitychange', updateTime);
 });
 
 </script>
@@ -154,9 +168,11 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.54);
   border-radius: 35px;
   position: relative;
-
+  align-self: flex-start;
   max-height: 380px;
   width: 100%;
+  min-height: 201px;
+  justify-content: center;
   &__title {
     align-self: flex-start;
     font-size: 40px;
