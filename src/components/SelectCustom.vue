@@ -1,19 +1,28 @@
-<template v-if="props.filteredList.lengt">
-    <div class="select-custom">
-      <label for="search"  @click.stop>
+<template>
+    <div class="select-custom"  @click.prevent.stop>
+      <label>
         <input
           type="text"
-          id="search"
           autocomplete="off"
           :placeholder="placeholder"
           v-model="inputCity"
-          @click.stop="showDropdown = true"
           @input="showDropdown = true, emitValueInput(inputCity)"
         />
     </label>
     <div class="dropdown" :class="{open}">
-        <div  class="dropdown__item" v-for="item in props.filteredList" :key="item.city">
-          <div class="dropdown__name" @click="emitGetTime(item.name)">{{item.city }}</div>
+        <div
+          v-for="item in props.filteredList"
+          class="dropdown__item"
+          :key="item + Math.random()"
+          @click="emitGetTime(item)"
+        >
+          <div class="dropdown__name" >{{item}}</div>
+        </div>
+        <div
+          class="dropdown__item"
+          v-if="!props.filteredList.length"
+        >
+          <div class="dropdown__name" >Ничего не найдено!</div>
         </div>
       </div>
     </div>
@@ -26,25 +35,30 @@ import {
 } from 'vue';
 
 interface Props {
-  filteredList: Array<{city: string, name: string}>,
+  filteredList: string[],
   placeholder: string,
 }
-const emit = defineEmits<{(e: string, name:string): void}>();
+
+const emit = defineEmits<{(e: 'select', name: string): void,
+  (e: 'valueInput', name: string): void,
+}>();
 
 const inputCity = ref('');
 const showDropdown = ref(false);
 
-const emitGetTime = (name:string) => {
+const emitGetTime = (item: string) => {
   inputCity.value = '';
   showDropdown.value = false;
-  emit('select', name);
+  emit('select', item);
 };
-const emitValueInput = (value:string) => {
-  emit('valueInput', value);
-};
+
 const props = withDefaults(defineProps<Props>(), {
   filteredList: () => ([]),
 });
+
+const emitValueInput = (value:string) => {
+  emit('valueInput', value);
+};
 
 const hide = () => {
   showDropdown.value = false;
@@ -91,12 +105,11 @@ watch(showDropdown, () => {
   .dropdown {
     position: absolute;
     width: 86%;
-    margin: 0 7%;
+    margin: 0 7% ;
     max-height: 0;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-    overflow: auto;
-    transition: max-height 0.3s;
+    overflow: hidden;
     background: black;
     z-index: 3;
 
@@ -104,6 +117,7 @@ watch(showDropdown, () => {
       max-height: 230px;
       border: 1px solid white;
       border-top: none;
+      overflow: auto;
     }
     &__item {
       padding: 7px 15px;
@@ -113,6 +127,19 @@ watch(showDropdown, () => {
         background: white;
         color: black;
       }
+    }
+    &::-webkit-scrollbar {
+      background: transparent;
+      width: 6px;
+      margin: 0 2px 0 0;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: white;
+      width: 4px;
+      border-radius: 4px;
     }
   }
 

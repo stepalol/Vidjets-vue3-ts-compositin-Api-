@@ -1,13 +1,86 @@
 <template>
 <div class="rate">
+  <Preloader v-if="!currentRate.length" />
+  <template v-else>
     <div class="rate__title">Курс</div>
     <div class="rate__delete"></div>
-    <select-custom :placeholder="'Выберите валюту'"/>
+    <div class="rate__block" v-if="showRate?.CharCode">
+        <div class="rate__current">
+          <div>
+            <p>{{showRate.CharCode}}</p>
+            <p>( {{showRate.Name}} )</p>
+          </div>
+          <div>
+            <p>{{showRate.Value.toFixed(2)}} RUB</p>
+          </div>
+        </div>
+        <div class="rate__move">
+          <img :src="graphic" alt="">
+        </div>
+    </div>
+    <select-custom
+      :placeholder="'Выберите валюту'"
+      :filtered-list="filteredRate"
+      @valueInput="valueInput"
+      @select="selectRate"
+    />
+  </template>
 </div>
 </template>
 
 <script lang="ts" setup>
 import SelectCustom from '@/components/SelectCustom.vue';
+import { useStore } from 'vuex';
+import { computed, ref, onBeforeUnmount } from 'vue';
+import { Course } from '@/interfaces/Irate';
+import Preloader from '@/components/Preloader.vue';
+
+const store = useStore();
+store.dispatch('getRate');
+const getRate = () => {
+  store.dispatch('getRate');
+};
+const updateRate = setInterval(getRate, 180000);
+
+const currentRate = computed <Course[]>(() => store.getters.CURRENT_RATE);
+const search = ref('');
+
+const valueInput = (e:string) => {
+  search.value = e;
+};
+const defaultRate = ref<string | undefined>('USD');
+
+const filteredRate = computed(() => {
+  if (search.value === '') return [];
+  const tempFilted:string[] = [];
+  currentRate.value.forEach((item: Course) => {
+    if (item.Name.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase()
+      || item.CharCode.slice(0, search.value.length).toLowerCase() === search.value.toLowerCase()) {
+      tempFilted.push(item.CharCode);
+    }
+  });
+  return tempFilted;
+});
+
+const showRate = computed(() => {
+  const filtered = currentRate.value.filter((item:Course) => item.CharCode === defaultRate.value);
+  return filtered[0];
+});
+
+const graphic = computed(() => {
+  if (showRate.value.Value > showRate.value.Previous) {
+    return require('@/assets/image/up.png');
+  }
+  return require('@/assets/image/down.png');
+});
+
+const selectRate = (item: string) => {
+  defaultRate.value = item;
+};
+
+onBeforeUnmount(() => {
+  clearInterval(updateRate);
+});
 </script>
 
 <style lang="scss">
@@ -22,6 +95,9 @@ import SelectCustom from '@/components/SelectCustom.vue';
     border-radius: 35px;
     position: relative;
     max-height: 380px;
+    align-self: flex-start;
+    min-height: 201px;
+    justify-content: center;
     &__title {
       align-self: flex-start;
       font-size: 40px;
@@ -65,6 +141,34 @@ import SelectCustom from '@/components/SelectCustom.vue';
             background-color: red;
             }
         }
+    }
+
+    &__block {
+      display: flex;
+    }
+    &__current {
+      width: 65%;
+      padding: 15px 0 0 23px;
+      & div:nth-child(1) {
+        p:nth-child(1) {
+          font-size: 36px;
+        }
+        p:nth-child(2) {
+          font-size: 20px;
+        }
+      }
+      & div:nth-child(2) {
+        font-size: 28px;
+        margin: 25px 0 10px 0;
+      }
+    }
+
+    &__move {
+      width: 38%;
+      img {
+        width: 100%;
+        padding: 0 22px 0 0;
+      }
     }
 
 }

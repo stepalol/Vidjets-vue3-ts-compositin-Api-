@@ -12,11 +12,13 @@ module.exports = {
     ecmaVersion: 2020,
   },
   rules: {
-    'max-len': ["error", { "code": 140 }],
+    'linebreak-style': 0,
+    'max-len': ["error", { "code": 150 }],
     'vue/max-len': ['error', {
-      code: 140,
-      template: 140,
+      code: 150,
+      template: 150,
     }],
+    'global-require': 'off',
 
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

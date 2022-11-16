@@ -1,10 +1,5 @@
 import axios from 'axios';
-
-interface time {
-  time:string,
-  name:string,
-  gmt:number,
-}
+import { Time } from '@/interfaces/Itime';
 
 const time = {
   mutations: {},
@@ -13,7 +8,7 @@ const time = {
       const res = await axios.get('http://worldtimeapi.org/api/timezone');
       return res.data;
     },
-    async getExtraTime(_:unknown, name:string):Promise<time> {
+    async getExtraTime(_:unknown, name:string):Promise<Time> {
       const res = await axios.get(`http://worldtimeapi.org/api/timezone/${name}`);
       const extraTime = {
         time: res.data.datetime,

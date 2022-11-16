@@ -1,33 +1,36 @@
 <template>
   <div class="time">
-    <div class="time__title">Время</div>
-    <div class="time__current">
-      {{timeUtc(clock.gmt)}}
-      <span :class="{'show': hidden}">:</span>
-      {{ editMinute}}
-      <span :class="{'show': hidden}">:</span>
-      {{editSecond}}
-    </div>
-    <select-custom
-      :filtered-list="filteredCity"
-      :placeholder="'Выберите странну'"
-      @valueInput="valueInput"
-      @select="closeDropdown"
-    />
-    <div class="time-extra">
-      <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
-        <div class="time-extra__name">{{item.name}}</div>
-        <div class="time-extra__clock">
-          {{timeUtc(item.gmt)}}
-          <span :class="{'show': hidden}">:</span>
-          {{editMinute}}
-          <span :class="{'show': hidden}" >:</span>
-          {{editSecond}}
-        </div>
-        <div class="time-extra__delete"></div>
+    <Preloader  v-if="!allFilter.length"/>
+    <template v-else>
+      <div class="time__title">Время</div>
+      <div class="time__current">
+        {{timeUtc(clock.gmt)}}
+        <span :class="{'show': hidden}">:</span>
+        {{ editMinute}}
+        <span :class="{'show': hidden}">:</span>
+        {{editSecond}}
       </div>
-    </div>
-    <div class="time__delete"></div>
+      <select-custom
+        :filtered-list="filteredCity"
+        :placeholder="'Выберите странну'"
+        @select="selectTime"
+        @valueInput="valueInput"
+      />
+      <div class="time-extra">
+        <div class="time-extra__item" v-for="item in extraTime" :key="item.name">
+          <div class="time-extra__name">{{item.name}}</div>
+          <div class="time-extra__clock">
+            {{timeUtc(item.gmt)}}
+            <span :class="{'show': hidden}">:</span>
+            {{editMinute}}
+            <span :class="{'show': hidden}" >:</span>
+            {{editSecond}}
+          </div>
+          <div class="time-extra__delete"></div>
+        </div>
+      </div>
+      <div class="time__delete"></div>
+    </template>
   </div>
 </template>
 
@@ -35,19 +38,15 @@
 import {
   computed, onMounted, onUnmounted, reactive, ref,
 } from 'vue';
+import Preloader from '@/components/Preloader.vue';
 import moment from 'moment';
 import { useStore } from 'vuex';
 import SelectCustom from '@/components/SelectCustom.vue';
-
-interface timeS {
-  time:string,
-  name:string,
-  gmt:number,
-}
+import { Time } from '@/interfaces/Itime';
 
 const store = useStore();
 const allFilter = ref([]); // state
-const extraTime = ref([] as Array<timeS>);
+const extraTime = ref([] as Array<Time>);
 const inputCity = ref('');
 const hidden = ref(true);
 const clock = reactive({
@@ -65,9 +64,15 @@ const editTime = (time:number) => {
   return time;
 };
 
-const closeDropdown = async (name:string) => {
-  const newTime = await store.dispatch('getExtraTime', name);
-  extraTime.value.push(newTime);
+const selectTime = (city:string) => {
+  allFilter.value.forEach(async (item:string) => {
+    const searchCity = item.split('/')[1];
+    if (!searchCity) return;
+    if (searchCity === city) {
+      const newTime = await store.dispatch('getExtraTime', item);
+      extraTime.value.push(newTime);
+    }
+  });
 };
 
 const valueInput = (e:string) => {
@@ -110,23 +115,33 @@ const editMinute = computed(() => editTime(clock.minute));
 const filteredCity = computed(() => {
   if (inputCity.value === '') return [];
 
-  const temporaryArray:Array<{name: string, city:string}> = [];
+  const temporaryArray:string[] = [];
+
   allFilter.value.forEach((item:string) => {
     const searchCity = item.split('/')[1];
     if (!searchCity) return;
 
-    if (searchCity.slice(0, inputCity.value.length).toLocaleLowerCase() === inputCity.value.toLocaleLowerCase()) {
+    if (searchCity.slice(0, inputCity.value.length).toLowerCase() === inputCity.value.toLowerCase()) {
       const name = {
         name: item,
         city: item.split('/')[1],
       };
-      temporaryArray.push(name);
+      temporaryArray.push(name.city);
     }
   });
 
   return temporaryArray;
 });
-
+const updateTime = () => {
+  if (document.visibilityState === 'visible') {
+    clock.second = +(moment().format(' ss '));
+    clock.minute = +(moment().format(' mm '));
+    // eslint-disable-next-line prefer-destructuring
+    clock.gmt = +(moment().format('Z').split(':')[0]);
+    clock.utc = +(moment().utc().format('HH'));
+  }
+};
+window.addEventListener('visibilitychange', updateTime);
 onMounted(async () => {
   clock.second = +(moment().format(' ss '));
   clock.minute = +(moment().format(' mm '));
@@ -138,6 +153,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearInterval(interval);
+  window.removeEventListener('visibilitychange', updateTime);
 });
 
 </script>
@@ -152,9 +168,11 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.54);
   border-radius: 35px;
   position: relative;
-
+  align-self: flex-start;
   max-height: 380px;
   width: 100%;
+  min-height: 201px;
+  justify-content: center;
   &__title {
     align-self: flex-start;
     font-size: 40px;
