@@ -111,14 +111,14 @@ const countVidgets = computed(() => {
     }
   }
   &__rate {
-    background-image: url('~@/assets/image/rate2.png');
+    background-image: url('../assets/image/rate2.png');
     background-position: right;
     transition: transform  0.4s, left 0.7s, filter 0.4s;
     left: -100%;
 
   }
   &__weather {
-    background-image: url('~@/assets/image/weather.png');
+    background-image: url('@/assets/image/weather.png');
     transition: transform  0.4s, bottom 0.7s, filter 0.4s;
     bottom: -100%;
   }
